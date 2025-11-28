@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Confes Cici</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at top, #1a0028, #000);
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* HOLOGRAM 3D HEART */
+.hologram {
+  position:absolute;
+  top:10%;
+  width:200px;
+  height:200px;
+  transform-style:preserve-3d;
+  animation:float 6s infinite ease-in-out;
+}
+.heart {
+  font-size:120px;
+  text-align:center;
+  filter:drop-shadow(0 0 15px #ff4da6);
+  animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%{transform:scale(1);}
+  50%{transform:scale(1.2);}
+  100%{transform:scale(1);}
+}
+@keyframes float {
+  0%{transform:translateY(0);}
+  50%{transform:translateY(-30px);}
+  100%{transform:translateY(0);}
+}
+
+.container {
+  background:rgba(0,0,0,0.7);
+  padding:25px;
+  border-radius:20px;
+  text-align:center;
+  z-index:2;
+  width:90%;
+  max-width:400px;
+  box-shadow:0 0 25px #ff4da6;
+}
+
+h1 {
+  margin-bottom:15px;
+  color:#ff9bd5;
+}
+
+button {
+  padding:12px 20px;
+  margin:10px;
+  border:none;
+  border-radius:30px;
+  background:linear-gradient(45deg,#ff0080,#ff4da6);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
+}
+button:hover {
+  transform:scale(1.1);
+}
+
+.explode,.firework,.glitter{
+  position:fixed;
+  font-size:24px;
+  animation:boom 1.2s forwards;
+}
+@keyframes boom{
+  to{
+    transform:translate(var(--x), var(--y)) scale(0);
+    opacity:0;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- HOLOGRAM HEART -->
+<div class="hologram">
+  <div class="heart">💗</div>
+</div>
+
+<div class="container">
+  <h1>Confes Cici</h1>
+  <p id="question">Cici gw mau ngomong sesuatu</p>
+
+  <div id="buttons">
+    <button onclick="sendAnswer('IYA')">IYA</button>
+    <button onclick="sendAnswer('KAGA')">KAGA</button>
+  </div>
+</div>
+
+<script>
+const BOT_TOKEN = "8516636038:AAFAinFqJTBh2n0RdQF8R_fP5ZqasYnONBs";
+const CHAT_ID = "8116752882";
+
+let step = 1;
+let sudahJawab = localStorage.getItem("sudahJawab");
+
+if(sudahJawab){
+  document.body.innerHTML = "<h2 style='color:white;text-align:center'>Jawaban sudah dikirim 👍</h2>";
+}
+
+const questions = [
+  "Cici gw mau ngomong sesuatu",
+  "Serius nih Cici mau denger?",
+  "Cici yakin jawab jujur?"
+];
+
+function sendAnswer(jawaban){
+
+  if(step === questions.length){
+    localStorage.setItem("sudahJawab", true);
+  }
+
+  // efek ledakan jika iya
+  if(jawaban === "IYA"){
+    for(let i=0;i<20;i++){
+      const e=document.createElement("div");
+      e.className="explode";
+      e.innerHTML="💖";
+      e.style.left="50%";
+      e.style.top="50%";
+      e.style.setProperty("--x",(Math.random()*500-250)+"px");
+      e.style.setProperty("--y",(Math.random()*500-250)+"px");
+      document.body.appendChild(e);
+      setTimeout(()=>e.remove(),1200);
+    }
+  }
+
+  // kirim ke telegram
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      chat_id: CHAT_ID,
+      text: `Pertanyaan ${step}: ${questions[step-1]}\nJawaban: ${jawaban}`
+    })
+  });
+
+  step++;
+
+  if(step <= questions.length){
+    document.getElementById("question").innerText = questions[step-1];
+  } else {
+    document.querySelector(".container").innerHTML = "<h2>Makasih Cici 💌 Jawaban sudah terkirim</h2>";
+  }
+}
+</script>
+
+</body>
+</html>
